@@ -410,7 +410,7 @@
     </div>
     
     <div class="game-info">
-        Guess the angle between the two lines! You have 4 attempts. Must be exact to win!
+        Guess the angle shown by the yellow arc! You have 4 attempts. Must be exact to win!
     </div>
     
     <div class="difficulty-hint">
@@ -549,14 +549,12 @@
             // Generate consistent angles for the day
             const seed1 = dayNumber * 16807; // Large prime multiplier
             const seed2 = dayNumber * 48271; // Another large prime
-            const seed3 = dayNumber * 69621; // Another large prime
             
             const baseAngle = Math.floor(seededRandom(seed1) * 360);
-            const targetAngle = Math.floor(seededRandom(seed2) * 360);
+            const targetAngle = Math.floor(seededRandom(seed2) * 360); // Full 0-360 range
             
-            // Ensure we have a meaningful angle (at least 10 degrees)
-            const minAngle = 10;
-            const adjustedTarget = Math.max(minAngle, Math.min(350, targetAngle));
+            // Ensure we have a meaningful angle (at least 5 degrees)
+            const adjustedTarget = Math.max(5, targetAngle);
             
             return {
                 angle1: baseAngle,
@@ -655,21 +653,17 @@
             const angle1Rad = (this.angle1 * Math.PI) / 180;
             const angle2Rad = (this.angle2 * Math.PI) / 180;
             
-            // Calculate start and end points
+            // Calculate start and end points for the arc
             const x1 = centerX + radius * Math.cos(angle1Rad);
             const y1 = centerY + radius * Math.sin(angle1Rad);
             const x2 = centerX + radius * Math.cos(angle2Rad);
             const y2 = centerY + radius * Math.sin(angle2Rad);
             
-            // Calculate the angle difference
-            let angleDiff = this.angle2 - this.angle1;
-            if (angleDiff < 0) angleDiff += 360;
-            if (angleDiff > 180) angleDiff = 360 - angleDiff;
+            // The target angle is the angle we want to show
+            // Always show the arc in the direction that represents the target angle
+            const largeArcFlag = this.targetAngle > 180 ? 1 : 0;
             
-            // Determine if we should use the large arc flag
-            const largeArcFlag = angleDiff > 180 ? 1 : 0;
-            
-            // Create the SVG arc path
+            // Create the SVG arc path - always go from angle1 to angle2 in the positive direction
             const pathData = `M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`;
             this.arcPath.setAttribute('d', pathData);
         }
