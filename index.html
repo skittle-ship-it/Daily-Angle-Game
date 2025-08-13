@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Angle - Guess the Angle!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+```
+    body {
+        font-family: 'Arial', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .game-container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 30px;
+        max-width: 500px;
+        width: 100%;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+
+    h1 {
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 2.5em;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .date-info {
+        color: #666;
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+
+    .date-navigation {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .nav-btn {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+    }
+
+    .nav-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .nav-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .angle-container {
+        position: relative;
+        margin: 30px auto;
+        width: 350px;
+        height: 350px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .angle-display {
+        position: relative;
+        width: 300px;
+        height: 300px;
+    }
+
+    .angle-line {
+        position: absolute;
+        width: 130px;
+        height: 4px;
+        border-radius: 2px;
+        transform-origin: 0 50%;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        z-index: 10;
+    }
+
+    .line1 {
+        top: 50%;
+        left: 50%;
+        transform: translate(0, -50%);
+        background: linear-gradient(90deg, #ff4757, #ff3742);
+    }
+
+    .line2 {
+        top: 50%;
+        left: 50%;
+        transform: translate(0, -50%);
+        background: linear-gradient(90deg, #2ed573, #1dd1a1);
+    }
+
+    .vertex-dot {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 12px;
+        height: 12px;
+        background: #333;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 15;
+    }
+
+    .angle-arc-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100px;
+        height: 100px;
+        transform: translate(-50%, -50%);
+        z-index: 5;
+    }
+
+    .angle-arc {
+        width: 100%;
+        height: 100%;
+    }
+
+    .angle-label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 20px;
+        font-weight: bold;
+        color: #333;
+        z-index: 20;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 8px 15px;
+        border-radius: 20px;
+        border: 3px solid #ffd93d;
+        box-shadow: 0 4px 12px rgba(255, 217, 61, 0.3);
+    }
+
+    .input-section {
+        margin: 30px 0;
+    }
+
+    .input-group {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    input[type="number"] {
+        padding: 15px;
+        font-size: 18px;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        width: 120px;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.9);
+        transition: all 0.3s ease;
+    }
+
+    input[type="number"]:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .guess-btn {
+        padding: 15px 30px;
+        font-size: 18px;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .guess-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    .guess-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .feedback {
+        margin: 20px 0;
+        padding: 15px;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        min-height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .feedback.high {
+        background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+        color: white;
+    }
+
+    .feedback.low {
+        background: linear-gradient(45deg, #4ecdc4, #44a08d);
+        color: white;
+    }
+
+    .feedback.correct {
+        background: linear-gradient(45deg, #51cf66, #40c057);
+        color: white;
+    }
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .stat-item {
+        background: rgba(102, 126, 234, 0.1);
+        padding: 15px;
+        border-radius: 10px;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .stat-value {
+        font-size: 20px;
+        font-weight: bold;
+        color: #667eea;
+    }
+
+    .stat-label {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+    }
+
+    .game-controls {
+        margin-top: 20px;
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .control-btn {
+        padding: 12px 25px;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .share-btn {
+        background: linear-gradient(45deg, #339af0, #228be6);
+        color: white;
+    }
+
+    .today-btn {
+        background: linear-gradient(45deg, #51cf66, #40c057);
+        color: white;
+    }
+
+    .control-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .guesses-display {
+        margin: 20px 0;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .guess-history {
+        background: rgba(0, 0, 0, 0.1);
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .game-info {
+        margin: 15px 0;
+        padding: 10px;
+        background: rgba(255, 215, 0, 0.1);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        font-size: 14px;
+        color: #666;
+    }
+
+    .difficulty-hint {
+        margin: 10px 0;
+        padding: 8px;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 6px;
+        font-size: 13px;
+        color: #667eea;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .share-encouragement {
+        margin: 15px 0;
+        padding: 10px;
+        background: rgba(81, 207, 102, 0.1);
+        border-radius: 8px;
+        border: 1px solid rgba(81, 207, 102, 0.3);
+        font-size: 14px;
+        color: #51cf66;
+        display: none;
+    }
+
+    .share-encouragement.show {
+        display: block;
+    }
+
+    .next-game-timer {
+        margin: 15px 0;
+        padding: 10px;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 8px;
+        border: 1px solid rgba(102, 126, 234, 0.3);
+        font-size: 14px;
+        color: #666;
+    }
+
+    @media (max-width: 600px) {
+        .game-container {
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 2em;
+        }
+        
+        .angle-container {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .angle-display {
+            width: 250px;
+            height: 250px;
+        }
+        
+        .angle-line {
+            width: 110px;
+        }
+        
+        .input-group {
+            flex-direction: column;
+        }
+        
+        input[type="number"] {
+            width: 150px;
+        }
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="game-container">
+        <h1>📐 Daily Angle</h1>
+
+```
+    <div class="date-info" id="dateInfo">Loading...</div>
+    
+    <div class="date-navigation">
+        <button class="nav-btn" id="prevDayBtn">← Previous</button>
+        <button class="nav-btn today-btn" id="todayBtn">Today</button>
+        <button class="nav-btn" id="nextDayBtn">Next →</button>
+    </div>
+    
+    <div class="game-info">
+        Guess the angle between the two lines! You have 4 attempts. Must be exact to win!
+    </div>
+    
+    <div class="difficulty-hint">
+        💡 Tip: Look at the arc size and line positions for clues
+    </div>
+    
+    <div class="angle-container">
+        <div class="angle-display">
+            <div class="angle-line line1" id="line1"></div>
+            <div class="angle-line line2" id="line2"></div>
+            <div class="vertex-dot"></div>
+            <div class="angle-arc-container">
+                <svg class="angle-arc" id="angleArc" viewBox="0 0 100 100">
+                    <path id="arcPath" fill="none" stroke="#ffd93d" stroke-width="4" opacity="0.8"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+    
+    <div class="input-section">
+        <div class="input-group">
+            <input type="number" id="guessInput" min="0" max="360" placeholder="0-360°">
+            <button class="guess-btn" id="guessBtn">Guess!</button>
+        </div>
+        
+        <div class="feedback" id="feedback">
+            Make your first guess!
+        </div>
+        
+        <div class="guesses-display" id="guessesDisplay"></div>
+    </div>
+    
+    <div class="share-encouragement" id="shareEncouragement">
+        🏆 Challenge your friends! Share your result and see who can do better.
+    </div>
+    
+    <div class="next-game-timer" id="nextGameTimer" style="display: none;">
+        Next angle in: <span id="countdown"></span>
+    </div>
+    
+    <div class="stats">
+        <div class="stat-item">
+            <div class="stat-value" id="gamesPlayed">0</div>
+            <div class="stat-label">Played</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="gamesWon">0</div>
+            <div class="stat-label">Won</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="winRate">0%</div>
+            <div class="stat-label">Win Rate</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="avgGuesses">0</div>
+            <div class="stat-label">Avg Guesses</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="currentStreak">0</div>
+            <div class="stat-label">Current Streak</div>
+        </div>
+    </div>
+    
+    <div class="game-controls">
+        <button class="control-btn share-btn" id="shareBtn">Share Result</button>
+    </div>
+</div>
+
+<script>
+    class DailyAngleGame {
+        constructor() {
+            // Fixed epoch date to ensure consistency across all users
+            this.gameStartDate = new Date(2024, 0, 1, 0, 0, 0, 0); // Jan 1, 2024 UTC
+            this.currentDate = new Date();
+            this.selectedDate = new Date();
+            this.targetAngle = 0;
+            this.angle1 = 0;
+            this.angle2 = 0;
+            this.currentGuess = 0;
+            this.guessesRemaining = 4;
+            this.gameWon = false;
+            this.gameOver = false;
+            this.guessHistory = [];
+            this.stats = this.loadStats();
+            
+            this.initElements();
+            this.updateStats();
+            this.setToday();
+            this.startCountdown();
+        }
+        
+        initElements() {
+            this.dateInfo = document.getElementById('dateInfo');
+            this.prevDayBtn = document.getElementById('prevDayBtn');
+            this.todayBtn = document.getElementById('todayBtn');
+            this.nextDayBtn = document.getElementById('nextDayBtn');
+            this.line1 = document.getElementById('line1');
+            this.line2 = document.getElementById('line2');
+            this.angleArc = document.getElementById('angleArc');
+            this.arcPath = document.getElementById('arcPath');
+            this.guessInput = document.getElementById('guessInput');
+            this.guessBtn = document.getElementById('guessBtn');
+            this.feedback = document.getElementById('feedback');
+            this.guessesDisplay = document.getElementById('guessesDisplay');
+            this.shareBtn = document.getElementById('shareBtn');
+            this.shareEncouragement = document.getElementById('shareEncouragement');
+            this.nextGameTimer = document.getElementById('nextGameTimer');
+            this.countdown = document.getElementById('countdown');
+            
+            this.guessBtn.addEventListener('click', () => this.makeGuess());
+            this.guessInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.makeGuess();
+            });
+            this.prevDayBtn.addEventListener('click', () => this.changeDate(-1));
+            this.nextDayBtn.addEventListener('click', () => this.changeDate(1));
+            this.todayBtn.addEventListener('click', () => this.setToday());
+            this.shareBtn.addEventListener('click', () => this.shareScore());
+        }
+        
+        getDayNumber(date) {
+            // Use UTC date to ensure consistency across timezones
+            const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const diffTime = utcDate - this.gameStartDate;
+            return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        }
+        
+        generateAngleForDate(date) {
+            const dayNumber = this.getDayNumber(date);
+            
+            // Use a more robust seeded random number generator
+            function seededRandom(seed) {
+                const x = Math.sin(seed) * 10000;
+                return x - Math.floor(x);
+            }
+            
+            // Generate consistent angles for the day
+            const seed1 = dayNumber * 16807; // Large prime multiplier
+            const seed2 = dayNumber * 48271; // Another large prime
+            const seed3 = dayNumber * 69621; // Another large prime
+            
+            const baseAngle = Math.floor(seededRandom(seed1) * 360);
+            const targetAngle = Math.floor(seededRandom(seed2) * 360);
+            
+            // Ensure we have a meaningful angle (at least 10 degrees)
+            const minAngle = 10;
+            const adjustedTarget = Math.max(minAngle, Math.min(350, targetAngle));
+            
+            return {
+                angle1: baseAngle,
+                angle2: (baseAngle + adjustedTarget) % 360,
+                targetAngle: adjustedTarget
+            };
+        }
+        
+        setToday() {
+            this.selectedDate = new Date();
+            this.loadDateGame();
+        }
+        
+        changeDate(days) {
+            this.selectedDate.setDate(this.selectedDate.getDate() + days);
+            this.loadDateGame();
+        }
+        
+        loadDateGame() {
+            const dayNumber = this.getDayNumber(this.selectedDate);
+            const isToday = this.selectedDate.toDateString() === this.currentDate.toDateString();
+            const isFuture = this.selectedDate > this.currentDate;
+            
+            // Update navigation buttons
+            this.nextDayBtn.disabled = isFuture;
+            this.todayBtn.style.display = isToday ? 'none' : 'inline-block';
+            
+            // Update date info
+            const dateStr = this.selectedDate.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            this.dateInfo.textContent = `${dateStr} - Day #${dayNumber}`;
+            
+            // Generate angle for this date
+            const angleData = this.generateAngleForDate(this.selectedDate);
+            this.angle1 = angleData.angle1;
+            this.angle2 = angleData.angle2;
+            this.targetAngle = angleData.targetAngle;
+            
+            // Load saved game state for this date
+            this.loadGameState();
+            this.setupAngle();
+            this.updateDisplay();
+            
+            // Show countdown only for today's completed game
+            if (isToday && this.gameOver) {
+                this.nextGameTimer.style.display = 'block';
+            } else {
+                this.nextGameTimer.style.display = 'none';
+            }
+            
+            console.log('Date:', this.selectedDate.toDateString(), 'Day:', dayNumber, 'Target angle:', this.targetAngle);
+        }
+        
+        loadGameState() {
+            const dateKey = this.selectedDate.toDateString();
+            const savedGame = JSON.parse(localStorage.getItem(`dailyAngle_${dateKey}`) || '{}');
+            
+            this.currentGuess = savedGame.currentGuess || 0;
+            this.guessesRemaining = savedGame.guessesRemaining !== undefined ? savedGame.guessesRemaining : 4;
+            this.gameWon = savedGame.gameWon || false;
+            this.gameOver = savedGame.gameOver || false;
+            this.guessHistory = savedGame.guessHistory || [];
+        }
+        
+        saveGameState() {
+            const dateKey = this.selectedDate.toDateString();
+            const gameState = {
+                currentGuess: this.currentGuess,
+                guessesRemaining: this.guessesRemaining,
+                gameWon: this.gameWon,
+                gameOver: this.gameOver,
+                guessHistory: this.guessHistory
+            };
+            localStorage.setItem(`dailyAngle_${dateKey}`, JSON.stringify(gameState));
+        }
+        
+        setupAngle() {
+            // Position the lines
+            this.line1.style.transform = `translate(0, -50%) rotate(${this.angle1}deg)`;
+            this.line2.style.transform = `translate(0, -50%) rotate(${this.angle2}deg)`;
+            
+            // Update the arc to show the angle clearly
+            this.updateArc();
+        }
+        
+        updateArc() {
+            const centerX = 50;
+            const centerY = 50;
+            const radius = 35;
+            
+            // Convert angles to radians
+            const angle1Rad = (this.angle1 * Math.PI) / 180;
+            const angle2Rad = (this.angle2 * Math.PI) / 180;
+            
+            // Calculate start and end points
+            const x1 = centerX + radius * Math.cos(angle1Rad);
+            const y1 = centerY + radius * Math.sin(angle1Rad);
+            const x2 = centerX + radius * Math.cos(angle2Rad);
+            const y2 = centerY + radius * Math.sin(angle2Rad);
+            
+            // Calculate the angle difference
+            let angleDiff = this.angle2 - this.angle1;
+            if (angleDiff < 0) angleDiff += 360;
+            if (angleDiff > 180) angleDiff = 360 - angleDiff;
+            
+            // Determine if we should use the large arc flag
+            const largeArcFlag = angleDiff > 180 ? 1 : 0;
+            
+            // Create the SVG arc path
+            const pathData = `M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`;
+            this.arcPath.setAttribute('d', pathData);
+        }
+        
+        updateDisplay() {
+            this.guessInput.disabled = this.gameOver;
+            this.guessBtn.disabled = this.gameOver;
+            
+            if (this.gameOver) {
+                if (this.gameWon) {
+                    this.feedback.textContent = `🎉 Correct! The angle was ${this.targetAngle}°`;
+                    this.feedback.className = 'feedback correct';
+                } else {
+                    this.feedback.textContent = `😞 The angle was ${this.targetAngle}°`;
+                    this.feedback.className = 'feedback';
+                }
+            } else {
+                if (this.currentGuess === 0) {
+                    this.feedback.textContent = 'Make your first guess!';
+                    this.feedback.className = 'feedback';
+                }
+            }
+            
+            this.updateGuessesDisplay();
+        }
+        
+        makeGuess() {
+            if (this.gameOver) return;
+            
+            const guess = parseInt(this.guessInput.value);
+            
+            if (isNaN(guess) || guess < 0 || guess > 360) {
+                this.feedback.textContent = 'Please enter a valid angle between 0 and 360 degrees.';
+                this.feedback.className = 'feedback';
+                return;
+            }
+            
+            this.currentGuess++;
+            this.guessesRemaining--;
+            this.guessHistory.push(guess);
+            
+            const difference = Math.abs(guess - this.targetAngle);
+            const tolerance = 0; // Only perfect guesses win
+            
+            if (difference <= tolerance) {
+                this.gameWon = true;
+                this.gameOver = true;
+                this.feedback.textContent = `🎉 Correct! The angle was ${this.targetAngle}°`;
+                this.feedback.className = 'feedback correct';
+                this.endGame();
+            } else if (this.guessesRemaining === 0) {
+                this.gameOver = true;
+                this.feedback.textContent = `😞 The angle was ${this.targetAngle}°`;
+                this.feedback.className = 'feedback';
+                this.endGame();
+            } else {
+                const isHigh = guess > this.targetAngle;
+                this.feedback.textContent = `${isHigh ? '📈 Too High!' : '📉 Too Low!'} ${this.guessesRemaining} guesses left`;
+                this.feedback.className = `feedback ${isHigh ? 'high' : 'low'}`;
+            }
+            
+            this.updateGuessesDisplay();
+            this.saveGameState();
+            this.guessInput.value = '';
+        }
+        
+        updateGuessesDisplay() {
+            this.guessesDisplay.innerHTML = '';
+            this.guessHistory.forEach((guess, index) => {
+                const guessElement = document.createElement('div');
+                guessElement.className = 'guess-history';
+                guessElement.textContent = `${index + 1}: ${guess}°`;
+                this.guessesDisplay.appendChild(guessElement);
+            });
+        }
+        
+        endGame() {
+            // Show share encouragement
+            this.shareEncouragement.classList.add('show');
+            
+            // Only update stats for today's game
+            if (this.selectedDate.toDateString() === this.currentDate.toDateString()) {
+                this.stats.gamesPlayed++;
+                if (this.gameWon) {
+                    this.stats.gamesWon++;
+                    this.stats.totalGuesses += this.currentGuess;
+                    this.stats.currentStreak++;
+                } else {
+                    this.stats.currentStreak = 0;
+                }
+                
+                this.saveStats();
+                this.updateStats();
+                
+                if (this.gameOver) {
+                    this.nextGameTimer.style.display = 'block';
+                }
+            }
+        }
+        
+        updateStats() {
+            document.getElementById('gamesPlayed').textContent = this.stats.gamesPlayed;
+            document.getElementById('gamesWon').textContent = this.stats.gamesWon;
+            document.getElementById('currentStreak').textContent = this.stats.currentStreak;
+            
+            const winRate = this.stats.gamesPlayed > 0 ? 
+                Math.round((this.stats.gamesWon / this.stats.gamesPlayed) * 100) : 0;
+            document.getElementById('winRate').textContent = winRate + '%';
+            
+            const avgGuesses = this.stats.gamesWon > 0 ? 
+                (this.stats.totalGuesses / this.stats.gamesWon).toFixed(1) : 0;
+            document.getElementById('avgGuesses').textContent = avgGuesses;
+        }
+        
+        loadStats() {
+            const saved = JSON.parse(localStorage.getItem('dailyAngleStats') || '{}');
+            return {
+                gamesPlayed: saved.gamesPlayed || 0,
+                gamesWon: saved.gamesWon || 0,
+                totalGuesses: saved.totalGuesses || 0,
+                currentStreak: saved.currentStreak || 0
+            };
+        }
+        
+        saveStats() {
+            localStorage.setItem('dailyAngleStats', JSON.stringify(this.stats));
+        }
+        
+        async shareScore() {
+            const dateStr = this.selectedDate.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            const dayNumber = this.getDayNumber(this.selectedDate);
+            
+            let resultText = `Daily Angle #${dayNumber} (${dateStr})\n\n`;
+            
+            if (this.gameWon) {
+                resultText += `🎯 ${this.currentGuess}/4 `;
+            } else {
+                resultText += `❌ X/4 `;
+            }
+            
+            // Add guess pattern with accuracy indicators
+            this.guessHistory.forEach((guess, index) => {
+                const diff = Math.abs(guess - this.targetAngle);
+                
+                if (diff === 0) {
+                    resultText += '🟢'; // Perfect
+                } else if (diff <= 3) {
+                    resultText += '🟡'; // Close
+                } else if (diff <= 5) {
+                    resultText += '🟠'; // Medium
+                } else {
+                    resultText += '🔴'; // Far
+                }
+            });
+            
+            // Add since inception stats
+            const winRate = this.stats.gamesPlayed > 0 ? 
+                Math.round((this.stats.gamesWon / this.stats.gamesPlayed) * 100) : 0;
+            const avgGuesses = this.stats.gamesWon > 0 ? 
+                (this.stats.totalGuesses / this.stats.gamesWon).toFixed(1) : 0;
+            
+            resultText += `\n\n📊 My Stats: ${this.stats.gamesWon}/${this.stats.gamesPlayed} (${winRate}%) | Streak: ${this.stats.currentStreak} | Avg: ${avgGuesses}`;
+            resultText += `\n\nPlay Daily Angle: ${window.location.href}`;
+            
+            try {
+                if (navigator.share && navigator.canShare && navigator.canShare({ text: resultText })) {
+                    await navigator.share({
+                        title: 'Daily Angle',
+                        text: resultText
+                    });
+                } else if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(resultText);
+                    // Show temporary success message
+                    const originalText = this.shareBtn.textContent;
+                    this.shareBtn.textContent = '📋 Copied!';
+                    this.shareBtn.style.background = 'linear-gradient(45deg, #51cf66, #40c057)';
+                    setTimeout(() => {
+                        this.shareBtn.textContent = originalText;
+                        this.shareBtn.style.background = 'linear-gradient(45deg, #339af0, #228be6)';
+                    }, 2000);
+                } else {
+                    // Fallback: show alert with text to copy manually
+                    prompt('Copy this result to share:', resultText);
+                }
+            } catch (error) {
+                console.error('Share failed:', error);
+                // Fallback: show alert with text to copy manually
+                alert('Share failed. Here\'s your result to copy:\n\n' + resultText);
+            }
+        }
+        
+        startCountdown() {
+            setInterval(() => {
+                const now = new Date();
+                const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+                const timeLeft = tomorrow - now;
+                
+                const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                
+                this.countdown.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+    }
+    
+    // Initialize the game when the page loads
+    window.addEventListener('load', () => {
+        new DailyAngleGame();
+    });
+</script>
+```
+
+</body>
+</html>
